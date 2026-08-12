@@ -1,5 +1,17 @@
-共享构建区要在stages.csv给出的两个维护窗口提高Pod安全等级。cache-writer仍以root运行，test-runner还在使用hostPath，直接提高build-shared的等级会中断构建。请用kubectl和Kustomize准备可交给平台管理员的发布包。
+互联网研发构建平台正在把共享命名空间从观察模式逐步迁移到Kubernetes Pod Security Standards v1.32。
 
-以current目录确定现行对象。baseline和restricted阶段要保留Pod身份，把两个普通构建Pod改为非root运行，使用RuntimeDefault，禁止提权并drop ALL，test-runner的工作区改为emptyDir。其他Namespace按namespace-policy.csv安排，暂不迁移的组件以retained-items.json为准。
+input_data/workloads_before.yaml记录现状，policy_contract.json记录阶段标签、准入默认值、过渡豁免及负责人，README.md说明本次离线复演覆盖的控制项。
 
-每个阶段都要有Kustomize入口和渲染清单，并整理Namespace标签、Pod变化、保留项与发布安排。窗口时间、影响范围、等待预算、观察时长、推进次序和回退目标都取自stages.csv。平台管理员一次只推进一个窗口，按retained-items.json观察现场信号，命中其中的回退条件时恢复到对应rollback_stage。
+请修复阶段发布包，让cache-writer和test-runner达到restricted，同时保持artifact-signer的现有合规状态。
+
+迁移按单阶段30分钟变更窗口推进，每个窗口只处理合同中的4个命名空间和5个发布Pod，不主动重建运行中的Pod。
+
+上线方式是由发布负责人选择对应stages目录执行；
+
+使用kubectl v1.32系列客户端的内置Kustomize分别渲染合同声明的阶段。
+
+PodSecurity AdmissionConfiguration只保留legacy-buildkit runtimeClass和legacy-vendor namespace两项过渡豁免，用户名与用户组豁免保持为空；
+
+negative_probe.yaml只用于验证从warn到enforce的迁移边界，不能进入任何阶段发布包。
+
+请用kubectl和Kustomize完成清单构建与配置审查。结论只覆盖静态清单和输入证据，不代替控制器、调度器或准入服务器的真实运行结果。

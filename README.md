@@ -1,3 +1,5 @@
-# Q2767 Windows reproduction
+# ALE题目2767的Windows复现
 
-This public repository contains one synthetic and deidentified Kubernetes task. The Windows2025 workflow uses kubectl1.32.6 and its built-in Kustomize to generate or compare the final delivery.
+本仓库只包含题目2767的脱敏或虚构材料。主软件为Kubernetes。工作流固定使用windows-2025，先核对四个附件哈希，再在两个独立目录展开输入和Reference，并调用主软件执行本地检查。
+
+当前仓库是独立验证载体，不包含飞书令牌、附件下载地址或原始备份。

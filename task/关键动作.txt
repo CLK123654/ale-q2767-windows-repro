@@ -1,5 +1,8 @@
-核对现行Namespace和Pod，找出会阻碍build-shared提高安全等级的配置。
-改写cache-writer和test-runner的安全上下文与工作卷，保持对象身份不变。
-把阶段计划和其他Namespace的等级安排写入三套Kustomize目录。
-使用kubectl kustomize生成各阶段清单并整理Pod变化和保留项。
-汇总窗口、影响范围、等待预算、观察时长、推进顺序和回退责任。
+读取policy_contract.json中的阶段标签、准入默认值、豁免范围和负责人。
+把cache-writer的root、提权和capability问题整改为restricted安全上下文。
+将test-runner的hostPath工作区改为emptyDir，并补齐Pod与容器安全上下文。
+限制PodSecurity AdmissionConfiguration的namespace与runtimeClass豁免面。
+调用kubectl内置Kustomize渲染每个阶段并核对资源身份、标签和Pod规格。
+依据README.md控制项计算before与after的baseline和restricted姿态。
+按豁免、enforce、warn和audit的顺序推导每个阶段的准入结果。
+使用kubectl和Kustomize构建最终清单，并把运行期结论与静态审查结论分开记录。

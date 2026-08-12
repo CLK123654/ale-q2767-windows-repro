@@ -1,1 +1,1 @@
-Task materials in this repository are synthetic and released for task reproduction. Kubernetes and kubectl are used under ApacheLicense2.0. PyYAML is used under the MIT license.
+代码采用MITLicense。task目录中的虚构题目材料采用CCBY4.0。第三方软件仍适用各自许可证。

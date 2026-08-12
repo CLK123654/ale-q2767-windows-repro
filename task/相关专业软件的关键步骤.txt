@@ -1,6 +1,8 @@
-1.读取现行Namespace和Pod清单，按namespace与name确定发布对象。
-2.为cache-writer和test-runner补齐Pod与容器安全上下文，并把test-runner的hostPath改为emptyDir。
-3.读取stages.csv和namespace-policy.csv，为current、baseline和restricted准备Namespace标签与Kustomize入口。
-4.分别执行kubectl kustomize，保存渲染清单并核对对象身份。
-5.从渲染结果整理Namespace标签、Pod变化和保留项，再按窗口计划编制发布安排。
-6.核对发布顺序、影响范围、等待预算、观察时长和回退责任，完成交接说明。
+1.读取input_data/policy_contract.json、workloads_before.yaml、negative_probe.yaml和README.md，并执行kubectl kustomize output/stages/stage-1-observe建立观察阶段的4个Namespace与5个Pod基线。
+2.检查cache-writer和test-runner的Pod级、容器级securityContext、capability与volume类型，在后续阶段完成restricted整改。
+3.分别执行kubectl kustomize output/stages/stage-2-baseline和kubectl kustomize output/stages/stage-3-restricted，按kind、namespace、name核对资源主键。
+4.从三次渲染的Namespace读取enforce、warn、audit及版本标签，对照policy_contract.json确认阶段推进关系。
+5.解析output/config/pod-security-admission.yaml，核对defaults、runtimeClasses、namespaces、usernames和groups，确认仅保留两项合同豁免。
+6.对before、after和negative_probe.yaml应用README.md中的baseline与restricted控制项，分别保留具名违规。
+7.按namespace豁免、runtimeClass豁免、enforce、warn和audit顺序生成stage_id与pod_key裁决矩阵。
+8.在Windows11原生PowerShell或macOS、Linux终端以含空格的独立路径重复入口，核对输入未变、负责人合法变异会传播、豁免扩张会在发布前失败。

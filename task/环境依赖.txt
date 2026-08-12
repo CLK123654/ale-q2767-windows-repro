@@ -1,5 +1,7 @@
-Windows11是支持的操作系统。主软件为Kubernetes，使用kubectl.exe1.32.6及其内置Kustomize处理本地清单。辅助工具为PowerShell7、Python3.12和UTF-8文本编辑器，Python依赖PyYAML6.0.2。随题清单可在普通办公工作站处理，不需要GPU。
+主软件为Kubernetes命令行工具kubectl，使用Windows11原生PowerShell运行kubectl.exe和内置Kustomize，不连接生产集群。
 
-输入资料只读，发布目录需要写入权限。安装软件时可以联网，开始制作发布包后不访问外部服务。不读取kubeconfig，不连接Kubernetes API Server，也不执行apply。kubectl和Kubernetes按ApacheLicense2.0使用，PyYAML按MIT许可使用，输入是虚构的研发平台资料。
+安装阶段可以联网取得主软件和锁定依赖，正式复现只读取题目输入并使用本机回环连接。辅助工具为PowerShell、Git和文本编辑器；公开仓库不包含凭据，许可按各软件原许可执行。
 
-本题特有风险是阶段目录能构建但对象身份或Namespace等级发生错位，也可能把仍以root运行或继续使用hostPath的普通Pod带入后续发布。集群应用、等待、观察和回退由具备目标Namespace权限的平台管理员在stages.csv规定的窗口内完成。
+建议准备2核CPU、4GB内存和2GB可用磁盘。权限限制为输入目录只读，程序只能写入指定工作目录；单次执行超时为15分钟，人工完成预计4至8小时。
+
+主要风险是观察阶段与收紧阶段引用不同Pod身份、豁免判断掩盖违规、probe误入发布包、runtimeClass或namespace豁免意外扩张、warn被错判为拒绝，以及Windows命令把含空格路径拆成多个参数。

@@ -1,1 +1,1 @@
-研发平台准备分两次发布提高共享构建区的Pod安全等级。平台工程师使用Kubernetes的kubectl和Kustomize改好两个普通构建Pod，编制各阶段的Namespace标签与回退资料。平台管理员拿到发布包后按窗口推进，构建服务出现异常时可恢复到上一状态。
+互联网研发构建平台要把共享工作负载从观察模式逐步收紧到Kubernetes Pod Security Standards v1.32，同时控制过渡豁免范围。使用kubectl内置Kustomize渲染三个阶段发布包，整改两个普通构建Pod，保留runtimeClass与namespace两类最小豁免，再从公开控制项推导警告、拒绝和豁免结果。
