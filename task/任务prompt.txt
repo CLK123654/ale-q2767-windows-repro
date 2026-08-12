@@ -2,4 +2,4 @@
 
 以current目录确定现行对象。baseline和restricted阶段要保留Pod身份，把两个普通构建Pod改为非root运行，使用RuntimeDefault，禁止提权并drop ALL，test-runner的工作区改为emptyDir。其他Namespace按namespace-policy.csv安排，暂不迁移的组件以retained-items.json为准。
 
-每个阶段都要有Kustomize入口和渲染清单，并整理Namespace标签、Pod变化、保留项与发布安排。窗口时间、影响范围、等待预算、观察时长、推进次序和回退目标都取自stages.csv。平台管理员一次只推进一个窗口，命中retained-items.json中的回退条件时恢复到对应rollback_stage。
+每个阶段都要有Kustomize入口和渲染清单，并整理Namespace标签、Pod变化、保留项与发布安排。窗口时间、影响范围、等待预算、观察时长、推进次序和回退目标都取自stages.csv。平台管理员一次只推进一个窗口，按retained-items.json观察现场信号，命中其中的回退条件时恢复到对应rollback_stage。
