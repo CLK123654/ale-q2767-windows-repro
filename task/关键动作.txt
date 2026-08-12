@@ -1,0 +1,5 @@
+对照现行Pod确认cache-writer的root与提权问题，以及test-runner使用hostPath的情况。
+为两个普通构建Pod补齐非root、RuntimeDefault、禁止提权和drop ALL设置，并把工作区改成emptyDir。
+根据阶段计划生成三套Namespace标签，观察窗口保留原Pod，后两个窗口引用安全版本。
+使用kubectl内置Kustomize分别构建三套清单，核对对象身份、阶段标签和Pod规格差异。
+登记暂不改动的RuntimeClass与命名空间对象，写清负责人、原因和现场核查事项。

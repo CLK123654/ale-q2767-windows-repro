@@ -1,0 +1,7 @@
+研发构建平台准备收紧共享命名空间。cache-writer仍以root运行，test-runner还挂载主机目录；直接提高Namespace等级会挡住发布。另有两个旧组件暂时不能改Pod规格。使用Kubernetes的kubectl与Kustomize，工作环境为Windows11。
+
+工作目录里有现行Namespace、Pod清单、阶段计划和保留项登记。现行文件保持原样，不要加入真实集群地址、kubeconfig或访问凭据。
+
+观察窗口保留现有Pod，后两个窗口使用新的安全上下文。Namespace的enforce、warn、audit及版本标签取自阶段计划。legacy-buildkitRuntimeClass和legacy-vendor命名空间只写入保留项记录，不把kube-apiserver配置当成普通Kubernetes对象。
+
+平台管理员会先比较三个阶段的标签和Pod规格，再选择当前窗口的Kustomize目录。发布材料要包含各阶段入口与渲染结果、工作负载差异、标签记录、保留项和现场说明。本地文件不能写成准入已经生效、Pod已经重新检查或集群已经允许或拒绝某次创建。
