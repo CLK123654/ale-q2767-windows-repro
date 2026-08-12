@@ -1,5 +1,5 @@
-Windows11是支持的操作系统。主软件为Kubernetes，使用kubectl.exe1.32.6与kubectl内置Kustomize。辅助工具是PowerShell7、Python3.12和UTF-8文本编辑器，Python读取CSV、JSON和YAML后导出发布记录。
+Windows11是支持的操作系统。主软件为Kubernetes，使用kubectl.exe1.32.6及其内置Kustomize处理本地清单。辅助工具为PowerShell7、Python3.12和UTF-8文本编辑器，Python依赖PyYAML6.0.2。需要双核CPU、4GB内存和1GB可写磁盘，不需要GPU。
 
-工作目录需要写入权限，原始资料保持只读。不读取kubeconfig，不连接Kubernetes API Server，也不执行apply。软件安装可以联网，开始处理发布资料后不访问外部服务。kubectl和Kubernetes使用ApacheLicense2.0。
+输入资料只读，发布目录需要写入权限。安装软件时可以联网，开始制作发布包后不访问外部服务。不读取kubeconfig，不连接Kubernetes API Server，也不执行apply。kubectl和Kubernetes按ApacheLicense2.0使用，PyYAML按MIT许可使用，输入是虚构的研发平台资料。
 
-阶段目录必须能由kubectl kustomize正常构建。对象身份被改动、Namespace等级与stages.csv错位、普通Pod继续使用root或hostPath都会影响发布。另一个业务风险是把本地渲染结果误当成集群准入结果。
+单次本地处理应在5分钟内结束。本题特有风险是阶段目录能构建但对象身份或Namespace等级发生错位，也可能把仍以root运行或继续使用hostPath的普通Pod带入后续发布。集群应用、等待、观察和回退由具备目标Namespace权限的平台管理员在stages.csv规定的窗口内完成。

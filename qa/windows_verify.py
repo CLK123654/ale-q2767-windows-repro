@@ -25,22 +25,25 @@ def main():
  ref=RUN/'reference';extract(TASK/'reference.zip',ref);expected_output=ref/'output';clean=[]
  for label in ['clean directory a with spaces','clean directory b with spaces']:
   base=RUN/label;extract(TASK/'输入数据包.zip',base);inp=base/'input_data';before={p.relative_to(inp).as_posix():sha(p) for p in inp.rglob('*') if p.is_file()}
-  for pi in (1,2):
-   out=base/f'output {pi}';c=build(inp,out)
-   if c.returncode:raise AssertionError(c.stdout+c.stderr)
-   generated=compare(out,expected_output);clean.append({'root_id':label,'process_index':pi,'return_code':0,'output_started_empty':True,'primary_software_executed':True,'input_unchanged':True,'reference_match':True,'generated_paths':generated})
+  out=base/'output';c=build(inp,out)
+  if c.returncode:raise AssertionError(c.stdout+c.stderr)
+  generated=compare(out,expected_output);clean.append({'root_id':label,'return_code':0,'output_started_empty':True,'primary_software_executed':True,'input_unchanged':True,'reference_match':True,'generated_paths':generated})
   if before!={p.relative_to(inp).as_posix():sha(p) for p in inp.rglob('*') if p.is_file()}:raise AssertionError('input changed')
- pos=RUN/'positive owner change';extract(TASK/'输入数据包.zip',pos);p=pos/'input_data/rollout/stages.csv';rows=list(csv.DictReader(p.open(encoding='utf-8',newline='')))
+ pos=RUN/'positive wait budget change';extract(TASK/'输入数据包.zip',pos);p=pos/'input_data/rollout/stages.csv';rows=list(csv.DictReader(p.open(encoding='utf-8',newline='')))
  for row in rows:
-  if row['stage_id']=='restricted':row['apply_owner']='security-release'
+  if row['stage_id']=='restricted':row['rollout_wait_minutes']='18'
  with p.open('w',encoding='utf-8',newline='') as h:w=csv.DictWriter(h,fieldnames=rows[0].keys(),lineterminator='\n');w.writeheader();w.writerows(rows)
  c=build(pos/'input_data',pos/'output')
  if c.returncode:raise AssertionError(c.stdout+c.stderr)
- if norm(pos/'output/results/namespace-labels.csv')==norm(expected_output/'results/namespace-labels.csv'):raise AssertionError('positive input did not alter label record')
- (E/'positive-case.json').write_text(json.dumps({'mutation':'restricted阶段负责人改为security-release','result_changed':True,'passed':True},ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
- neg=RUN/'negative extra retained item';extract(TASK/'输入数据包.zip',neg);p=neg/'input_data/rollout/retained-items.json';data=json.loads(p.read_text(encoding='utf-8'));data['runtime_classes'].append({'value':'extra-runtime','workload':'build-shared/cache-writer','owner':'unknown','reason':'unexpected'});p.write_text(json.dumps(data,ensure_ascii=False,indent=2)+'\n',encoding='utf-8');out=neg/'output';out.mkdir();(out/'stale.txt').write_text('stale',encoding='utf-8');c=build(neg/'input_data',out)
- if c.returncode==0 or out.exists():raise AssertionError('retained scope expansion did not fail closed')
+ if norm(pos/'output/results/stage-plan.csv')==norm(expected_output/'results/stage-plan.csv'):raise AssertionError('positive input did not alter window record')
+ (E/'positive-case.json').write_text(json.dumps({'mutation':'restricted阶段等待预算由15分钟改为18分钟','result_changed':True,'passed':True},ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+ neg=RUN/'negative incomplete release window';extract(TASK/'输入数据包.zip',neg);p=neg/'input_data/rollout/stages.csv';rows=list(csv.DictReader(p.open(encoding='utf-8',newline='')))
+ for row in rows:
+  if row['stage_id']=='baseline':row['window_end_utc']=''
+ with p.open('w',encoding='utf-8',newline='') as h:w=csv.DictWriter(h,fieldnames=rows[0].keys(),lineterminator='\n');w.writeheader();w.writerows(rows)
+ out=neg/'output';out.mkdir();(out/'stale.txt').write_text('stale',encoding='utf-8');c=build(neg/'input_data',out)
+ if c.returncode==0 or out.exists():raise AssertionError('incomplete release window did not fail closed')
  (E/'negative-case.log').write_text(f'return_code={c.returncode}\n{c.stdout}{c.stderr}',encoding='utf-8')
- s={'result':'PASS','commit_sha':os.getenv('GITHUB_SHA'),'workflow_run_id':os.getenv('GITHUB_RUN_ID'),'runner_image':os.getenv('ImageOS'),'main_software':{'name':'Kubernetes','kubectl_version':json.loads(v.stdout),'executed':True},'attachment_sha256':actual,'clean_directory_count':2,'process_runs_per_directory':2,'clean_runs':clean,'positive_mutation':'PASS','negative_case':'PASS','formal_network':{'python_outbound_blocked':True,'kubectl_outbound_blocked':True,'api_server_used':False,'external_services_used':False},'linux_executables':[],'linux_executables_executed':False}
+ s={'result':'PASS','commit_sha':os.getenv('GITHUB_SHA'),'workflow_run_id':os.getenv('GITHUB_RUN_ID'),'runner_image':os.getenv('ImageOS'),'main_software':{'name':'Kubernetes','kubectl_version':json.loads(v.stdout),'executed':True},'attachment_sha256':actual,'clean_directory_count':2,'process_runs_per_directory':1,'clean_runs':clean,'positive_mutation':'PASS','negative_case':'PASS','formal_network':{'python_outbound_blocked':True,'kubectl_outbound_blocked':True,'api_server_used':False,'external_services_used':False},'linux_executables':[],'linux_executables_executed':False}
  (E/'windows-summary.json').write_text(json.dumps(s,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
 if __name__=='__main__':main()

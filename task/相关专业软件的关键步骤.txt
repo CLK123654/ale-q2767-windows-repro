@@ -1,6 +1,6 @@
-1.打开现行Namespace和Pod清单，按namespace与name确定需要保持的对象身份。
-2.为cache-writer和test-runner设置Pod级seccomp与runAsNonRoot，再改好容器权限和卷类型。
-3.从stages.csv读取build-shared的标签、版本与负责人，其他Namespace按namespace-policy.csv取值，写入各阶段的namespaces.yaml。
-4.观察阶段放入现行Pod，基线和收紧阶段放入改写后的Pod，然后编制对应的kustomization.yaml。
-5.对三个阶段分别执行kubectl kustomize，保存渲染清单，再导出Namespace标签、Pod差异和保留项记录。
-6.汇总发布数量与现场操作，在RELEASE-NOTES.md中区分本地渲染结果和集群上线结果。
+1.读取现行Namespace和Pod清单，按namespace与name确定发布对象。
+2.为cache-writer和test-runner补齐Pod与容器安全上下文，并把test-runner的hostPath改为emptyDir。
+3.读取stages.csv和namespace-policy.csv，为current、baseline和restricted准备Namespace标签与Kustomize入口。
+4.分别执行kubectl kustomize，保存渲染清单并核对对象身份。
+5.从渲染结果整理Namespace标签、Pod变化和保留项，再按窗口计划编制发布安排。
+6.核对发布顺序、影响范围、等待预算、观察时长和回退责任，完成交接说明。

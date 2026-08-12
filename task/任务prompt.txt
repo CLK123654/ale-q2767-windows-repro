@@ -1,7 +1,5 @@
-共享构建命名空间将在三个维护窗口逐步收紧。cache-writer仍以root运行，test-runner还在使用主机目录，直接提高Namespace等级会影响构建。使用Kubernetes的kubectl和Kustomize完成这次发布准备。
+共享构建区要在stages.csv给出的两个维护窗口提高Pod安全等级。cache-writer仍以root运行，test-runner还在使用hostPath，直接提高build-shared的等级会中断构建。请用kubectl和Kustomize准备可交给平台管理员的发布包。
 
-现行Namespace与Pod清单用来定对象范围。stages.csv记录build-shared的阶段标签，namespace-policy.csv列出其他Namespace的过渡等级，retained-items.json则保留尚未迁移的旧组件。
+以current目录确定现行对象。baseline和restricted阶段要保留Pod身份，把两个普通构建Pod改为非root运行，使用RuntimeDefault，禁止提权并drop ALL，test-runner的工作区改为emptyDir。其他Namespace按namespace-policy.csv安排，暂不迁移的组件以retained-items.json为准。
 
-观察窗口沿用现行Pod；后两个窗口改用非root、RuntimeDefault、禁止提权和drop ALL的版本，test-runner的工作区改为emptyDir。按计划写Namespace标签，用kubectl kustomize保存三份渲染清单，再整理标签、Pod和保留项记录。
-
-平台管理员先比较三套渲染结果，再选当前窗口的Kustomize目录。RELEASE-NOTES.md写清旧组件负责人和上线后的现场工作，本地渲染不是API Server准入结果。
+每个阶段都要有Kustomize入口和渲染清单，并整理Namespace标签、Pod变化、保留项与发布安排。窗口时间、影响范围、等待预算、观察时长、推进次序和回退目标都取自stages.csv。平台管理员一次只推进一个窗口，命中retained-items.json中的回退条件时恢复到对应rollback_stage。

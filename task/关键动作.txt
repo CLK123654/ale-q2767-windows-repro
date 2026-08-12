@@ -1,4 +1,5 @@
-从现行清单找出会阻碍安全等级上调的Pod，同时将尚未迁移的旧组件与普通构建负载分开。
-改写cache-writer和test-runner的安全上下文和卷，保持对象身份不变。
-把阶段计划转成三套Namespace标签与Kustomize目录，并留下渲染清单及差异记录。
-将保留项的原因、负责人和现场操作写入发布资料，供平台管理员选择维护窗口。
+核对现行Namespace和Pod，找出会阻碍build-shared提高安全等级的配置。
+改写cache-writer和test-runner的安全上下文与工作卷，保持对象身份不变。
+把阶段计划和其他Namespace的等级安排写入三套Kustomize目录。
+使用kubectl kustomize生成各阶段清单并整理Pod变化和保留项。
+汇总窗口、影响范围、等待预算、观察时长、推进顺序和回退责任。
