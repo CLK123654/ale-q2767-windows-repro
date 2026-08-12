@@ -64,11 +64,11 @@ def main():
   write_csv(results/'retained-items.csv',['category','value','workload','owner','reason'],retained_rows)
   notes=['# 共享构建区发布说明','', 'current阶段保存变更前清单。legacy-buildkit由build-platform负责，legacy-vendor由vendor-transition负责，两者在完成迁移前保持现状。','', '维护窗口一次只推进一个阶段。']
   for s in stages:
-   if s['stage_id']!='current':notes.append(f"{s['stage_name']}安排在{s['window_start_utc']}至{s['window_end_utc']}，影响{s['impact_scope']}。应用后等待{s['rollout_wait_minutes']}分钟，再观察{s['observe_minutes']}分钟；命中回退条件时由{s['rollback_owner']}恢复到{s['rollback_stage']}阶段。")
+   if s['stage_id']!='current':notes.append(f"{s['stage_name']}安排在{s['window_start_utc']}至{s['window_end_utc']}，影响范围是{s['impact_scope']}。应用后等待{s['rollout_wait_minutes']}分钟，再观察{s['observe_minutes']}分钟；命中回退条件时由{s['rollback_owner']}恢复到{s['rollback_stage']}阶段。")
   notes+=['']
   notes.extend(f"观察信号：{item}" for item in retained['observation_signals'])
   notes.extend(f"回退条件：{item}" for item in retained['rollback_triggers'])
-  notes.append('任一信号命中回退条件时停止本次发布。')
+  notes.append('命中任一回退条件时停止本次发布。')
   (t/'RELEASE-NOTES.md').write_text('\n'.join(notes)+'\n',encoding='utf-8');t.replace(o);return 0
  except Exception as e:
   if t.exists():shutil.rmtree(t)
