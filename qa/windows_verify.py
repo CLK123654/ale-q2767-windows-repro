@@ -25,9 +25,10 @@ def main():
  ref=RUN/'reference';extract(TASK/'reference.zip',ref);expected_output=ref/'output';clean=[]
  for label in ['clean directory a with spaces','clean directory b with spaces']:
   base=RUN/label;extract(TASK/'输入数据包.zip',base);inp=base/'input_data';before={p.relative_to(inp).as_posix():sha(p) for p in inp.rglob('*') if p.is_file()}
-  out=base/'output';c=build(inp,out)
-  if c.returncode:raise AssertionError(c.stdout+c.stderr)
-  generated=compare(out,expected_output);clean.append({'root_id':label,'return_code':0,'output_started_empty':True,'primary_software_executed':True,'input_unchanged':True,'reference_match':True,'generated_paths':generated})
+  for pi in (1,2):
+   out=base/f'output {pi}';c=build(inp,out)
+   if c.returncode:raise AssertionError(c.stdout+c.stderr)
+   generated=compare(out,expected_output);clean.append({'root_id':label,'process_index':pi,'return_code':0,'output_started_empty':True,'primary_software_executed':True,'input_unchanged':True,'reference_match':True,'generated_paths':generated})
   if before!={p.relative_to(inp).as_posix():sha(p) for p in inp.rglob('*') if p.is_file()}:raise AssertionError('input changed')
  pos=RUN/'positive wait budget change';extract(TASK/'输入数据包.zip',pos);p=pos/'input_data/rollout/stages.csv';rows=list(csv.DictReader(p.open(encoding='utf-8',newline='')))
  for row in rows:
@@ -44,6 +45,6 @@ def main():
  out=neg/'output';out.mkdir();(out/'stale.txt').write_text('stale',encoding='utf-8');c=build(neg/'input_data',out)
  if c.returncode==0 or out.exists():raise AssertionError('incomplete release window did not fail closed')
  (E/'negative-case.log').write_text(f'return_code={c.returncode}\n{c.stdout}{c.stderr}',encoding='utf-8')
- s={'result':'PASS','commit_sha':os.getenv('GITHUB_SHA'),'workflow_run_id':os.getenv('GITHUB_RUN_ID'),'runner_image':os.getenv('ImageOS'),'main_software':{'name':'Kubernetes','kubectl_version':json.loads(v.stdout),'executed':True},'attachment_sha256':actual,'clean_directory_count':2,'process_runs_per_directory':1,'clean_runs':clean,'positive_mutation':'PASS','negative_case':'PASS','formal_network':{'python_outbound_blocked':True,'kubectl_outbound_blocked':True,'api_server_used':False,'external_services_used':False},'linux_executables':[],'linux_executables_executed':False}
+ s={'result':'PASS','commit_sha':os.getenv('GITHUB_SHA'),'workflow_run_id':os.getenv('GITHUB_RUN_ID'),'runner_image':os.getenv('ImageOS'),'main_software':{'name':'Kubernetes','kubectl_version':json.loads(v.stdout),'executed':True},'attachment_sha256':actual,'clean_directory_count':2,'process_runs_per_directory':2,'clean_runs':clean,'positive_mutation':'PASS','negative_case':'PASS','formal_network':{'python_outbound_blocked':True,'kubectl_outbound_blocked':True,'api_server_used':False,'external_services_used':False},'linux_executables':[],'linux_executables_executed':False}
  (E/'windows-summary.json').write_text(json.dumps(s,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
 if __name__=='__main__':main()
