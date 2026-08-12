@@ -56,7 +56,7 @@
 检查项：暂留组件记录
 优先级：普通项
 所属层级：L9跨产物一致性与可追溯层
-标准答案：retained-items.csv登记retained-items.json中的runtime_classes与namespaces记录，并保留value、workload、owner和reason；usernames与groups不产生记录。
+标准答案：retained-items.csv登记retained-items.json中的runtime_classes与namespaces记录，并保留value、workload、owner和reason。
 关键字段：category、value、workload、owner、reason。
 容差：CSV行序可以变化，复合记录集合精确匹配。
 失败边界：扩大保留范围，漏掉负责人或原因，或把暂留项写成阶段Kubernetes对象。

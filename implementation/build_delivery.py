@@ -29,7 +29,7 @@ def main():
   with (i/'rollout/namespace-policy.csv').open(encoding='utf-8',newline='') as h:r=csv.DictReader(h);policies={x['namespace']:x for x in r};policy_header=['namespace','enforce','warn','audit']
   if r.fieldnames!=policy_header:raise ValueError('namespace policy differs')
   retained=json.loads((i/'rollout/retained-items.json').read_text(encoding='utf-8'))
-  if set(retained)!={'runtime_classes','namespaces','usernames','groups','observation_signals','rollback_triggers'} or retained['usernames'] or retained['groups']:raise ValueError('retained item shape differs')
+  if set(retained)!={'runtime_classes','namespaces','observation_signals','rollback_triggers'}:raise ValueError('retained item shape differs')
   if not retained['runtime_classes'] or not retained['namespaces'] or not retained['observation_signals'] or not retained['rollback_triggers']:raise ValueError('retained item content differs')
   t.mkdir(parents=True);stage_root=t/'stages';stage_root.mkdir();rendered_root=t/'rendered';rendered_root.mkdir();stage_records=[];workload_records=[];plan_records=[]
   baseline_names={x['metadata']['name'] for x in namespaces}
