@@ -1,1 +1,1 @@
-研发平台准备分阶段收紧共享构建命名空间，普通Pod需要改为受限安全上下文，两个旧组件暂时保留现状。使用Kubernetes的kubectl与Kustomize制作三套发布清单，从本地渲染结果核对Namespace标签、Pod变更和保留项，供平台管理员逐个维护窗口应用。
+共享构建命名空间将分三个维护窗口提高安全等级。用Kubernetes的kubectl和Kustomize改好普通Pod的安全上下文，安排Namespace标签，保留两个尚未迁移的旧组件。平台管理员将从三套Kustomize目录中选择当前窗口的版本。

@@ -1,5 +1,5 @@
-在Windows11上使用主软件Kubernetes，kubectl.exe版本为1.32.6，Kustomize采用kubectl内置版本。辅助工具包括PowerShell7、Python3.12和UTF-8文本编辑器；Python用于读取CSV、JSON与YAML并导出静态记录。
+Windows11是支持的操作系统。主软件为Kubernetes，使用kubectl.exe1.32.6与kubectl内置Kustomize。辅助工具是PowerShell7、Python3.12和UTF-8文本编辑器，Python读取CSV、JSON和YAML后导出发布记录。
 
-输入目录保持只读，结果写入单独目录。处理过程不读取kubeconfig，不连接Kubernetes API Server，也不执行apply。软件安装时可以联网，开始构建清单后不访问外部服务。kubectl与Kubernetes按ApacheLicense2.0使用。
+工作目录需要写入权限，原始资料保持只读。不读取kubeconfig，不连接Kubernetes API Server，也不执行apply。软件安装可以联网，开始处理发布资料后不访问外部服务。kubectl和Kubernetes使用ApacheLicense2.0。
 
-开始前需要确认kubectl kustomize能够工作，并为结果目录预留写入权限。业务风险主要是观察窗口和后续窗口引用了不同的Pod身份、标签等级写错、普通Pod仍保留root或hostPath设置，以及把kube-apiserver配置或本地推导当成集群准入结果。
+阶段目录必须能由kubectl kustomize正常构建。对象身份被改动、Namespace等级与stages.csv错位、普通Pod继续使用root或hostPath都会影响发布。另一个业务风险是把本地渲染结果误当成集群准入结果。

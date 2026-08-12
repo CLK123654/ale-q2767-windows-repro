@@ -3,7 +3,7 @@ import argparse,csv,json,shutil,subprocess,sys
 from pathlib import Path
 import yaml
 ROOT=Path(__file__).resolve().parents[1]
-EXPECTED={'README.md','current/namespaces.yaml','current/workloads.yaml','rollout/stages.csv','rollout/retained-items.json'}
+EXPECTED={'README.md','current/namespaces.yaml','current/workloads.yaml','rollout/stages.csv','rollout/namespace-policy.csv','rollout/retained-items.json'}
 LABELS=['pod-security.kubernetes.io/enforce','pod-security.kubernetes.io/enforce-version','pod-security.kubernetes.io/warn','pod-security.kubernetes.io/warn-version','pod-security.kubernetes.io/audit','pod-security.kubernetes.io/audit-version']
 def docs(p):return [x for x in yaml.safe_load_all(p.read_text(encoding='utf-8')) if x]
 def write_csv(p,fields,rows):
@@ -20,6 +20,8 @@ def main():
   if {key(x) for x in before}!={key(x) for x in safe}:raise ValueError('workload identity differs')
   with (i/'rollout/stages.csv').open(encoding='utf-8',newline='') as h:r=csv.DictReader(h);stages=list(r);expected_header=['stage_id','stage_name','build_shared_enforce','build_shared_warn','build_shared_audit','version','apply_owner'];
   if not stages or r.fieldnames!=expected_header or len({x['stage_id'] for x in stages})!=len(stages):raise ValueError('stage plan differs')
+  with (i/'rollout/namespace-policy.csv').open(encoding='utf-8',newline='') as h:r=csv.DictReader(h);policies={x['namespace']:x for x in r};policy_header=['namespace','enforce','warn','audit']
+  if r.fieldnames!=policy_header or set(policies)!={'build-signed','buildkit-system','legacy-vendor'}:raise ValueError('namespace policy differs')
   retained=json.loads((i/'rollout/retained-items.json').read_text(encoding='utf-8'))
   if set(retained)!={'runtime_classes','namespaces','usernames','groups','post_apply_checks'} or retained['usernames'] or retained['groups']:raise ValueError('retained item shape differs')
   if len(retained['runtime_classes'])!=1 or len(retained['namespaces'])!=1:raise ValueError('retained item count differs')
@@ -31,9 +33,7 @@ def main():
    for source in namespaces:
     item=json.loads(json.dumps(source));name=item['metadata']['name'];labels=item['metadata'].setdefault('labels',{})
     if name=='build-shared':enforce,warn,audit=stage['build_shared_enforce'],stage['build_shared_warn'],stage['build_shared_audit']
-    elif name=='build-signed':enforce=warn=audit='restricted'
-    elif name=='buildkit-system':enforce,warn,audit='privileged','restricted','restricted'
-    else:enforce,warn,audit='privileged','baseline','baseline'
+    else:enforce,warn,audit=(policies[name][x] for x in ('enforce','warn','audit'))
     values=[enforce,stage['version'],warn,stage['version'],audit,stage['version']]
     for label,value in zip(LABELS,values):labels[label]=value
     ns_out.append(item);stage_records.append({'stage_id':stage['stage_id'],'namespace':name,'enforce':enforce,'warn':warn,'audit':audit,'version':stage['version'],'apply_owner':stage['apply_owner']})
@@ -55,8 +55,8 @@ def main():
   for category in ('runtime_classes','namespaces'):
    for item in retained[category]:retained_rows.append({'category':category,'value':item['value'],'workload':item['workload'],'owner':item['owner'],'reason':item['reason']})
   write_csv(results/'retained-items.csv',['category','value','workload','owner','reason'],retained_rows)
-  summary={'status':'READY','review_scope':'LOCAL_RENDERED_MANIFEST_ONLY','stage_count':len(stages),'namespace_record_count':len(stage_records),'workload_record_count':len(workload_records),'retained_item_count':len(retained_rows),'post_apply_owner':'平台管理员','post_apply_checks':retained['post_apply_checks'],'note':'本地清单不能证明准入策略生效、Pod已重新检查或集群允许或拒绝创建'}
-  (results/'release-summary.json').write_text(json.dumps(summary,ensure_ascii=False,indent=2)+'\n',encoding='utf-8');(t/'tools').mkdir();shutil.copy2(Path(__file__),t/'tools/build_delivery.py');(t/'RELEASE-NOTES.md').write_text('# 共享构建区安全收紧说明\n\n当前记录只针对rendered目录中的本地清单，不代表集群准入结果。\n\n平台管理员选择阶段目录应用后，需要确认Namespace标签、目标Pod替换结果，并从集群日志核对实际告警与拒绝。\n',encoding='utf-8');t.replace(o);return 0
+  summary={'package_scope':'LOCAL_RENDERED_MANIFESTS','stage_count':len(stages),'namespace_record_count':len(stage_records),'workload_record_count':len(workload_records),'retained_item_count':len(retained_rows),'cluster_actions_owner':'平台管理员','cluster_actions':retained['post_apply_checks'],'note':'本地清单只记录准备情况，不代表API Server的真实准入结果'}
+  (results/'release-summary.json').write_text(json.dumps(summary,ensure_ascii=False,indent=2)+'\n',encoding='utf-8');(t/'RELEASE-NOTES.md').write_text('# 共享构建区安全收紧说明\n\nrendered目录保存三个维护窗口的本地清单。legacy-buildkit由build-platform负责，legacy-vendor由vendor-transition负责，两者在完成迁移前保持现状。\n\n平台管理员选择阶段目录应用后，再查看Namespace标签、目标Pod替换结果与集群准入日志。本地渲染不代表API Server的真实准入结果。\n',encoding='utf-8');t.replace(o);return 0
  except Exception as e:
   if t.exists():shutil.rmtree(t)
   if o.exists():shutil.rmtree(o)
